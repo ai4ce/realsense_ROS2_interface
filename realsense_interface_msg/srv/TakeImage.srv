@@ -1,0 +1,4 @@
+std_msgs/String modality_name
+
+---
+sensor_msgs/Image frame
