@@ -17,16 +17,21 @@ from rclpy.node import Node
 class ImageClient(Node):
 
     def __init__(self):
-        super().__init__('image_client')
+        super().__init__('image_client') # type: ignore
 
+
+        ############################ Miscanellous Setup #######################################
         self.cvbridge = CvBridge() # for converting ROS images to OpenCV images
 
         self._debounce_setup() # for debouncing the capture button
+        self.shutter = False # when this is true, the client will issue a request to the server to capture images
 
+        ############################ Launch Parameters ########################################
         # parameter handling
         self.declare_parameter(name = 'img_folder', value = '/home/irving/Desktop')
         self.img_folder = self.get_parameter('img_folder').get_parameter_value().string_value
 
+        ############################ Client Setup #############################################
         # rgb client
         self.rgb_cli = self.create_client(
             srv_type=TakeImage, 
@@ -41,20 +46,19 @@ class ImageClient(Node):
         while not self.depth_cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Depth service not available, waiting again...')
         
-        # subscribe to joy topic to read joystick button press
-        self.joy_sub = self.create_subscription(
-            msg_type=Joy, 
-            topic='/joy', 
-            callback=self.joy_callback, 
-            qos_profile=10)
-
         self.rgb_req = TakeImage.Request()
         self.rgb_req.modality_name.data = 'rgb'
 
         self.depth_req = TakeImage.Request()
         self.depth_req.modality_name.data = 'depth'
 
-        self.shutter = False # when this is true, the client will issue a request to the server to capture images
+        ############################ Subscriber Setup #########################################
+        # subscribe to joy topic to read joystick button press
+        self.joy_sub = self.create_subscription(
+            msg_type=Joy, 
+            topic='/joy', 
+            callback=self.joy_callback, 
+            qos_profile=10)
 
     def joy_callback(self, msg):
         
@@ -101,7 +105,7 @@ class ImageClient(Node):
     def _debounce_setup(self):
         '''
         As in any embedded system, we need to debounce the capture button.
-        While we human think we press the button once, the computer actually consider the button pressed all the time,
+        While we human think we press the button once, the computer actually consider the button pressed all the time during the duration of the press,
         because the polling rate is much faster than the human reaction time. 
         
         This function sets up a buffer to store the last value of the button press so that we can detect the rising edge.

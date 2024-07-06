@@ -11,18 +11,19 @@ import time
 class ImageServer(Node):
 
     def __init__(self):
-        super().__init__('image_server')
+        super().__init__('image_server') # type: ignore
 
         # for multi-threaded callback
         multithread_group = ReentrantCallbackGroup()
 
-        # parameter handling
+        ############################ Launch Parameters ########################################
         self.declare_parameter(name = 'camera_namespace', value = 'xArm6')
         self.declare_parameter(name = 'camera_name', value = 'D405')
 
         self.camere_namespace = self.get_parameter('camera_namespace').get_parameter_value().string_value
         self.camera_name = self.get_parameter('camera_name').get_parameter_value().string_value
 
+        ############################ Subscriber Setup ########################################
         # Subscribe to rgb
         self.rgb_sub = self.create_subscription(
             msg_type = Image, 
@@ -50,6 +51,7 @@ class ImageServer(Node):
         # Binary flag that specifies whether to record the buffer
         self._cam2capture = {cam: False for cam in self._cam2buffer.keys()}
         
+        ############################ Service Setup ########################################
         # Service for rgb
         self.rgb_service = self.create_service(
             srv_type=TakeImage,

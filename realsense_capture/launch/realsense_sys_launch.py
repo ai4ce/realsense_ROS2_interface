@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Launch realsense2_camera node."""
+"""Launch the entire realsense system."""
 import os
-from sympy import im
 import yaml
 from launch import LaunchDescription
 import launch_ros.actions
