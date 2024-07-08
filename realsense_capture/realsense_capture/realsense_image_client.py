@@ -28,8 +28,8 @@ class ImageClient(Node):
 
         ############################ Launch Parameters ########################################
         # parameter handling
-        self.declare_parameter(name = 'img_folder', value = '/home/irving/Desktop')
-        self.img_folder = self.get_parameter('img_folder').get_parameter_value().string_value
+        self.declare_parameter(name = 'save_folder', value = '/home/irving/Desktop')
+        self.save_folder = self.get_parameter('save_folder').get_parameter_value().string_value
 
         ############################ Client Setup #############################################
         # rgb client
@@ -75,7 +75,7 @@ class ImageClient(Node):
         '''
         encoded_img = self.cvbridge.imgmsg_to_cv2(img_msg=img, 
                                                   desired_encoding='passthrough')
-        cv2.imwrite(os.path.join(self.img_folder, f'{modality}_{img.header.stamp.sec}.png'), encoded_img)
+        cv2.imwrite(os.path.join(self.save_folder, f'{modality}_{img.header.stamp.sec}.png'), encoded_img)
 
         # color the log message
         color_start = '\033[94m'

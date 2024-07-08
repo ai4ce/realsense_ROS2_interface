@@ -24,8 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'image_server = realsense_capture.image_server:main',
-            'image_client = realsense_capture.image_client:main',
+            'realsense_image_server = realsense_capture.realsense_image_server:main',
+            'realsense_image_client = realsense_capture.realsense_image_client:main',
         ],
     },
 )
