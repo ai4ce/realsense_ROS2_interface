@@ -52,7 +52,14 @@ ros2 launch realsense_capture realsense_sys_launch.py
 
 ***Note***: The launch file also launches Foxglove, a visualization/monitoring app for ROS2. Get rid of related lines if desired. 
 
-There is no need to launch the RealSense ROS wrapper separately, as they are integrated in the launch file.
+There is no need to launch the RealSense ROS wrapper separately, as they are integrated into the launch file.
+
+### Parameters
+There are many parameters you can tune that come with RealSense, but some of the most important ones are:
+
+1. `camera_namespace` and `camera_name`: the topic name of your camera in ROS2 will be in the form of `camera_namespace/camera_name/xxx
+
+2. `save_folder`: indicates where to save the `.png` of the depth and color images.
 
 
 ## Contributing

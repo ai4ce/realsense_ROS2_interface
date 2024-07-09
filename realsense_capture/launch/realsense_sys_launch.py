@@ -28,6 +28,7 @@ from launch_ros.actions import Node
 
 configurable_parameters = [{'name': 'camera_namespace',             'default': 'xArm6', 'description': 'namespace for camera'},
                            {'name': 'camera_name',                  'default': 'D405', 'description': 'camera unique name'},
+                           {'name': 'save_folder',                  'default': '/home/zf540/Desktop/save_folder/image', 'description': 'folder to save images'},
                            {'name': 'serial_no',                    'default': "''", 'description': 'choose device by serial number'},
                            {'name': 'usb_port_id',                  'default': "''", 'description': 'choose device by usb port id'},
                            {'name': 'device_type',                  'default': "''", 'description': 'choose device by type'},
@@ -88,7 +89,7 @@ configurable_parameters = [{'name': 'camera_namespace',             'default': '
                            {'name': 'hdr_merge.enable',             'default': 'false', 'description': 'hdr_merge filter enablement flag'},
                            {'name': 'wait_for_device_timeout',      'default': '-1.', 'description': 'Timeout for waiting for device to connect (Seconds)'},
                            {'name': 'reconnect_timeout',            'default': '6.', 'description': 'Timeout(seconds) between consequtive reconnection attempts'},
-                           {'name': 'save_folder',                   'default': '/home/irving/Desktop', 'description': 'folder to save images'},
+                           
                           ]
 
 def declare_configurable_parameters(parameters):
@@ -149,7 +150,7 @@ def generate_launch_description():
 
     image_server_launch = Node(
         package='realsense_capture',
-        executable='image_server',
+        executable='realsense_image_server',
         name='image_server',
         parameters=[{'camera_namespace': launch_params['camera_namespace'], 
                      'camera_name': launch_params['camera_name']
@@ -158,7 +159,7 @@ def generate_launch_description():
 
     image_client_launch = Node(
         package='realsense_capture',
-        executable='image_client',
+        executable='realsense_image_client',
         name='image_client',
         parameters=[{'save_folder': launch_params['save_folder'],
                      }]

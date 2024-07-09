@@ -73,9 +73,10 @@ class ImageClient(Node):
         modality: str
         Use cv_bridge to convert ROS image to OpenCV image and save it to disk
         '''
+        # this is in RGB
         encoded_img = self.cvbridge.imgmsg_to_cv2(img_msg=img, 
                                                   desired_encoding='passthrough')
-        cv2.imwrite(os.path.join(self.save_folder, f'{modality}_{img.header.stamp.sec}.png'), encoded_img)
+        cv2.imwrite(os.path.join(self.save_folder, f'{modality}_{img.header.stamp.sec}.png'), cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
 
         # color the log message
         color_start = '\033[94m'
