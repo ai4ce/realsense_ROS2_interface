@@ -83,6 +83,7 @@ class ImageClient(Node):
         color_reset = '\033[0m'
 
         self.get_logger().info(f'{color_start}{modality} image saved{color_reset}')
+        return encoded_img
     
     def depth_postprocess(self, img):
         '''
