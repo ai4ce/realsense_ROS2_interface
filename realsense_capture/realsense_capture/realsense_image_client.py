@@ -1,6 +1,7 @@
 from realsense_interface_msg.srv import TakeImage
 
 from sensor_msgs.msg import Joy
+from sensor_msgs.msg import Image
 
 from queue import Queue
 
@@ -52,6 +53,17 @@ class ImageClient(Node):
         self.depth_req = TakeImage.Request()
         self.depth_req.modality_name.data = 'depth'
 
+        ############################ Publisher Setup ##########################################
+        self.rgb_publisher = self.create_publisher(
+            msg_type=Image, 
+            topic='/realsense_capture/captured_rgb_image', 
+            qos_profile=10)
+        
+        self.depth_publisher = self.create_publisher(
+            msg_type=Image, 
+            topic='/realsense_capture/captured_depth_image', 
+            qos_profile=10)
+        
         ############################ Subscriber Setup #########################################
         # subscribe to joy topic to read joystick button press
         self.joy_sub = self.create_subscription(
@@ -74,15 +86,22 @@ class ImageClient(Node):
         Use cv_bridge to convert ROS image to OpenCV image and save it to disk
         '''
         # this is in RGB
+        if modality == 'rgb':
+            self.rgb_publisher.publish(img)
+        elif modality == 'depth':
+            self.depth_publisher.publish(img)
+
         encoded_img = self.cvbridge.imgmsg_to_cv2(img_msg=img, 
                                                   desired_encoding='passthrough')
-        cv2.imwrite(os.path.join(self.save_folder, f'{modality}_{img.header.stamp.sec}.png'), cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
-
         # color the log message
         color_start = '\033[94m'
         color_reset = '\033[0m'
-
-        self.get_logger().info(f'{color_start}{modality} image saved{color_reset}')
+        
+        if self.save_folder != '':
+            cv2.imwrite(os.path.join(self.save_folder, f'{modality}_{img.header.stamp.sec}.png'), cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
+            self.get_logger().info(f'{color_start}{modality} image saved{color_reset}')
+        else:
+            self.get_logger().info(f'{color_start}{modality} image captured, not saved{color_reset}')
         return encoded_img
     
     def depth_postprocess(self, img):
