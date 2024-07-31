@@ -129,6 +129,8 @@ def launch_setup(context, params, param_name_suffix=''):
 
 def generate_launch_description():
     launch_params = set_configurable_parameters(configurable_parameters)
+
+    calibration_path = os.path.join(get_package_share_directory('realsense_capture'), 'config', 'calibration.yaml')
     # Node to establish foxglove connection
     foxglove_launch = IncludeLaunchDescription(
         XMLLaunchDescriptionSource(
@@ -165,6 +167,13 @@ def generate_launch_description():
                      }]
     )
 
+    static_tf_publisher_launch = Node(
+        package='realsense_capture',
+        executable='realsense_static_tf_publisher',
+        name='realsense_static_tf_publisher',
+        parameters=[{'calibration_path': calibration_path}]
+    )
+
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + 
                              [OpaqueFunction(function=launch_setup, kwargs = {'params' : launch_params})] + 
-                             [foxglove_launch, joy_launch, image_server_launch, image_client_launch])
+                             [foxglove_launch, joy_launch, image_server_launch, image_client_launch, static_tf_publisher_launch])

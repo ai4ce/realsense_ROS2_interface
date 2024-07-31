@@ -1,0 +1,7 @@
+# distance between the camera mount and the center of the gripper. All units in milimeter
+mount_translation_x: 0.0
+mount_translation_y: 69.66
+mount_translation_z: 41.1 
+
+d405_height: 23.0
+d405_center2left: 9.0
