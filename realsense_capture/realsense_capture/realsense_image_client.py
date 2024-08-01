@@ -222,7 +222,7 @@ class ImageClient(Node):
         
         # get the coordinate of the camera in the base frame
         transformstamp = self.tf_buffer.lookup_transform(target_frame='link_base', 
-                                            source_frame='link_camera', 
+                                            source_frame='link_realsense', 
                                             time=Time(), 
                                             timeout=Duration(seconds=2))
         transformation_matrix = self._process_tf(transformstamp)
