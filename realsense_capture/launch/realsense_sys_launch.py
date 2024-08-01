@@ -28,7 +28,7 @@ from launch_ros.actions import Node
 
 configurable_parameters = [{'name': 'camera_namespace',             'default': 'xArm6', 'description': 'namespace for camera'},
                            {'name': 'camera_name',                  'default': 'D405', 'description': 'camera unique name'},
-                           {'name': 'save_folder',                  'default': '/home/zf540/Desktop/save_folder/image', 'description': 'folder to save images'},
+                           {'name': 'save_folder',                  'default': '/home/zf540/Desktop/save_folder/', 'description': 'folder to save images'},
                            {'name': 'json_path',                    'default': '/home/zf540/Desktop/save_folder/realsense_transform.json', 'description': 'path to the logging json file. This is different from RealSense JSON parameter. If empty, no logging will be done'},
                            {'name': 'serial_no',                    'default': "''", 'description': 'choose device by serial number'},
                            {'name': 'usb_port_id',                  'default': "''", 'description': 'choose device by usb port id'},
@@ -177,6 +177,9 @@ def generate_launch_description():
         parameters=[{'calibration_path': calibration_path}]
     )
 
+    # return LaunchDescription(declare_configurable_parameters(configurable_parameters) + 
+    #                          [OpaqueFunction(function=launch_setup, kwargs = {'params' : launch_params})] + 
+    #                          [foxglove_launch, joy_launch, image_server_launch, image_client_launch, static_tf_publisher_launch])
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + 
                              [OpaqueFunction(function=launch_setup, kwargs = {'params' : launch_params})] + 
-                             [foxglove_launch, joy_launch, image_server_launch, image_client_launch, static_tf_publisher_launch])
+                             [image_server_launch, image_client_launch, static_tf_publisher_launch])
