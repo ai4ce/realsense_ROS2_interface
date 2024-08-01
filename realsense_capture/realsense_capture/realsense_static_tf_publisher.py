@@ -1,8 +1,4 @@
-import sys
-import numpy as np
 import yaml
-
-from transforms3d.quaternions import mat2quat
 
 from geometry_msgs.msg import TransformStamped
 
@@ -16,10 +12,10 @@ class RealSenseStaticTFPublisher(Node):
     Broadcast transforms that never change.
     """
 
-    def __init__(self, transformation):
+    def __init__(self):
         super().__init__('realsense_static_tf_publisher') # type: ignore
-        ############################ Launch Parameters ########################################
 
+        ############################ Launch Parameters ########################################
         # it's complicated why we need to load the config path instead of the content of config. See launch file for explanation
         self.declare_parameter(name = 'calibration_path', value = '')
         config_path = self.get_parameter('calibration_path').get_parameter_value().string_value
@@ -56,7 +52,7 @@ class RealSenseStaticTFPublisher(Node):
 
 def main():
     rclpy.init()
-    node = RealSenseStaticTFPublisher(sys.argv)
+    node = RealSenseStaticTFPublisher()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

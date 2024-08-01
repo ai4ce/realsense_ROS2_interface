@@ -29,6 +29,7 @@ from launch_ros.actions import Node
 configurable_parameters = [{'name': 'camera_namespace',             'default': 'xArm6', 'description': 'namespace for camera'},
                            {'name': 'camera_name',                  'default': 'D405', 'description': 'camera unique name'},
                            {'name': 'save_folder',                  'default': '/home/zf540/Desktop/save_folder/image', 'description': 'folder to save images'},
+                           {'name': 'json_path',                    'default': '/home/zf540/Desktop/save_folder/realsense_transform.json', 'description': 'path to the logging json file. This is different from RealSense JSON parameter. If empty, no logging will be done'},
                            {'name': 'serial_no',                    'default': "''", 'description': 'choose device by serial number'},
                            {'name': 'usb_port_id',                  'default': "''", 'description': 'choose device by usb port id'},
                            {'name': 'device_type',                  'default': "''", 'description': 'choose device by type'},
@@ -164,6 +165,8 @@ def generate_launch_description():
         executable='realsense_image_client',
         name='image_client',
         parameters=[{'save_folder': launch_params['save_folder'],
+                     'calibration_path': calibration_path,
+                     'json_path': launch_params['json_path'],
                      }]
     )
 
