@@ -1,3 +1,4 @@
+from pydoc import cli
 from realsense_interface_msg.srv import TakeImage
 
 from sensor_msgs.msg import Joy
@@ -120,52 +121,50 @@ class ImageClient(Node):
 
         encoded_img = self.cvbridge.imgmsg_to_cv2(img_msg=img, 
                                                   desired_encoding='passthrough')
-        # color the log message in blue
-        color_start = '\033[94m'
-        color_reset = '\033[0m'
-        
-        if self.save_folder != '':
-            if modality == 'rgb':
-                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.png'), 
-                            cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
-            else:
-                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.png'), 
-                            encoded_img)
-            self.get_logger().info(f'{color_start}{modality} image saved{color_reset}')
-        else:
-            self.get_logger().info(f'{color_start}{modality} image captured, not saved{color_reset}')
-        
+
         if modality == 'rgb':
+            # save the image
+            self._log_image(encoded_img, modality)
+
             # publish the image
             self.rgb_publisher.publish(img)
             
             '''
             only update json with RGB. We treat depth as an accessory
             '''
-            # update the json dict
-            if self.json_path != '':
-                self._json_update()
-
-                # overwrite the JSON file if there is one. Not sure if this is the best way to do it
-                # potentially we can just keep the json_dict in memory and dump it at the end of the program
-                # but this is a good way to keep the json file updated in case the program cannot exit as expected
-                with open(self.json_path, 'wt') as f:
-                    json.dump(self.json_dict, f)
-                
-                # color the log message in green
-                color_start = '\033[92m'
-                color_reset = '\033[0m'
-                self.get_logger().info(f'{color_start}JSON file updated{color_reset}')
+            self._json_update()
 
             # only increase the count with RGB so we don't double count
             self.rgb_count += 1
 
         elif modality == 'depth':
+            self._log_image(encoded_img, modality)
             self.depth_publisher.publish(img)
             self.depth_count += 1
 
         return encoded_img
     
+    def _log_image(self, img, modality):
+        '''
+        Save the image to disk
+        '''
+        # color the save log message in blue
+        save_color_start = '\033[94m'
+        save_color_reset = '\033[0m'
+
+        if self.save_folder != '':
+            if modality == 'rgb':
+                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.png'), 
+                            cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+                np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.npy'), img)
+            else:
+                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.png'), 
+                            img)
+                np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.npy'), img)
+            self.get_logger().info(f'{save_color_start}{modality} image saved{save_color_reset}')
+        else:
+            self.get_logger().info(f'{save_color_start}{modality} image captured, not saved{save_color_reset}')
+
     def depth_postprocess(self, img):
         '''
         I didn't use this. Not sure if normalizing is necessary anymore after I started to use cv_bridge. But keep it just in case
@@ -221,6 +220,21 @@ class ImageClient(Node):
                                                             [0.0, 0.0, 1.0, 0.0]], dtype=np.float64).tolist()
 
     def _json_update(self):
+
+        # color the json log message in green
+        json_color_start = '\033[92m'
+        json_color_reset = '\033[0m'
+
+        if self.json_path != '':
+            self._json_update_helper()
+            # overwrite the JSON file if there is one. Not sure if this is the best way to do it
+            # potentially we can just keep the json_dict in memory and dump it at the end of the program
+            # but this is a good way to keep the json file updated in case the program cannot exit as expected
+            with open(self.json_path, 'wt') as f:
+                json.dump(self.json_dict, f)
+            self.get_logger().info(f'{json_color_start}JSON file updated{json_color_reset}')
+
+    def _json_update_helper(self):
         '''
         Update the json dict with the latest transform
         '''

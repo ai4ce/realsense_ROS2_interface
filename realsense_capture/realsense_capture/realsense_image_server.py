@@ -1,3 +1,4 @@
+from calendar import c
 import rclpy
 from rclpy.node import Node
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -24,10 +25,16 @@ class ImageServer(Node):
         self.camera_name = self.get_parameter('camera_name').get_parameter_value().string_value
 
         ############################ Subscriber Setup ########################################
+        # The topic name is different for D405 due to the fact that D405 reconstructs RGB from depth
+        if 'D405' in self.camera_name:
+            rgb_topic_name = 'image_rect_raw'
+        else:
+            rgb_topic_name = 'image_raw'
+
         # Subscribe to rgb
         self.rgb_sub = self.create_subscription(
             msg_type = Image, 
-            topic = f'/{self.camere_namespace}/{self.camera_name}/color/image_rect_raw', 
+            topic = f'/{self.camere_namespace}/{self.camera_name}/color/{rgb_topic_name}', 
             callback = functools.partial(self.sub_image_callback, 'rgb'), 
             qos_profile = 10,
             callback_group = multithread_group)

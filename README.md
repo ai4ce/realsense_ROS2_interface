@@ -57,7 +57,9 @@ There is no need to launch the RealSense ROS wrapper separately, as they are int
 ### Parameters
 There are many parameters you can tune that come with RealSense, but some of the most important ones are:
 
-1. `camera_namespace` and `camera_name`: the topic name of your camera in ROS2 will be in the form of `camera_namespace/camera_name/xxx
+1. `camera_namespace` and `camera_name`: the topic name of your camera in ROS2 will be in the form of `camera_namespace/camera_name/xxx`
+    a. The convention I am using is that I set `camera_name` to be the model name. 
+    **Note** that if you use D405, please put the string `D405` somewhere in the `camera_name`, as some logic later on depends on it. This is due to some quirkiness of D405 specifically.
 
 2. `save_folder`: indicates where to save the `.png` of the depth and color images.
 
