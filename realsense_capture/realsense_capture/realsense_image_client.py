@@ -49,7 +49,8 @@ class ImageClient(Node):
         self.depth_save_folder = os.path.join(self.save_folder, 'depth')
         os.makedirs(self.depth_save_folder, exist_ok=True)
 
-        self.image_count = 0
+        self.rgb_count = 0
+        self.depth_count = 0
 
         ############################ JSON Setup ###############################################
         if self.json_path != '':
@@ -124,8 +125,12 @@ class ImageClient(Node):
         color_reset = '\033[0m'
         
         if self.save_folder != '':
-            cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.image_count}.png'), 
-                        cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
+            if modality == 'rgb':
+                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.png'), 
+                            cv2.cvtColor(encoded_img, cv2.COLOR_RGB2BGR))
+            else:
+                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.png'), 
+                            encoded_img)
             self.get_logger().info(f'{color_start}{modality} image saved{color_reset}')
         else:
             self.get_logger().info(f'{color_start}{modality} image captured, not saved{color_reset}')
@@ -153,10 +158,11 @@ class ImageClient(Node):
                 self.get_logger().info(f'{color_start}JSON file updated{color_reset}')
 
             # only increase the count with RGB so we don't double count
-            self.image_count += 1
+            self.rgb_count += 1
 
         elif modality == 'depth':
             self.depth_publisher.publish(img)
+            self.depth_count += 1
 
         return encoded_img
     
@@ -228,10 +234,10 @@ class ImageClient(Node):
         transformation_matrix = self._process_tf(transformstamp)
 
 
-        update_dict['file_path'] = os.path.join('rgb', f'rgb_{self.image_count}.png')
+        update_dict['file_path'] = os.path.join('rgb', f'rgb_{self.rgb_count}.png')
         update_dict['transformation_matrix'] = transformation_matrix.tolist()
-        update_dict['colmap_im_id'] = self.image_count
-        update_dict['depth_file_path'] = os.path.join('depth', f'depth_{self.image_count}.png')
+        update_dict['colmap_im_id'] = self.rgb_count
+        update_dict['depth_file_path'] = os.path.join('depth', f'depth_{self.rgb_count}.png')
 
         self.json_dict['frames'].append(update_dict)
         
