@@ -5,6 +5,9 @@ from geometry_msgs.msg import TransformStamped
 import rclpy
 from rclpy.node import Node
 
+from rclpy.time import Time
+from rclpy.duration import Duration
+
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
@@ -30,26 +33,29 @@ class RealSenseStaticTFPublisher(Node):
 
         self.tf_static_broadcaster = StaticTransformBroadcaster(self)
 
+
+
+        # ############################ TF Setup ########################################
+        self.link_name = 'link_realsense'
         # Publish static transforms once at startup
         self.make_transforms()
 
-        # ############################ TF Setup ########################################
-        # # buffer to hold the transform in a cache
-        # self.tf_buffer = Buffer()
+        # buffer to hold the transform in a cache
+        self.tf_buffer = Buffer()
 
-        # # listener. Important to spin a thread, otherwise the listen will block and no TF can be updated
-        # self.tf_listener = TransformListener(buffer=self.tf_buffer, node=self, spin_thread=True)
+        # listener. Important to spin a thread, otherwise the listen will block and no TF can be updated
+        self.tf_listener = TransformListener(buffer=self.tf_buffer, node=self, spin_thread=True)
 
-        # self.pose_publisher = self.create_publisher(
-        # msg_type=TransformStamped, 
-        # topic='/realsense_capture/realsense_pose', 
-        # qos_profile=10)
+        self.pose_publisher = self.create_publisher(
+        msg_type=TransformStamped, 
+        topic='/realsense_capture/realsense_pose', 
+        qos_profile=10)
 
-        # self.create_timer(0.5, self.publish_pose)
+        self.create_timer(0.5, self.publish_pose)
     
     def publish_pose(self):
         try:
-            t = self.tf_buffer.lookup_transform('link_base', 'link_realsense', self.get_clock().now())
+            t = self.tf_buffer.lookup_transform('link_base', self.link_name, Time(), timeout=Duration(seconds=2))
             self.pose_publisher.publish(t)
         except Exception as e:
             self.get_logger().info(f"Failed to publish pose: {e}")
@@ -59,7 +65,7 @@ class RealSenseStaticTFPublisher(Node):
 
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = 'link_eef'
-        t.child_frame_id = 'link_realsense'
+        t.child_frame_id = self.link_name
 
         t.transform.translation.x = float(-self.d405_center2left)*0.001
         t.transform.translation.y = float(-self.mount_translation_y)*0.001
