@@ -35,8 +35,8 @@ class ImageClient(Node):
         self.save_folder = self.get_parameter('save_folder').get_parameter_value().string_value
         self.declare_parameter(name = 'calibration_path', value = '')
         calibration_path = self.get_parameter('calibration_path').get_parameter_value().string_value
-        self.declare_parameter(name = 'json_path', value = '')
-        self.json_path = self.get_parameter('json_path').get_parameter_value().string_value
+        self.declare_parameter(name = 'save_json_path', value = '')
+        self.json_path = self.get_parameter('save_json_path').get_parameter_value().string_value
 
         ############################ Miscanellous Setup #######################################
         self.cvbridge = CvBridge() # for converting ROS images to OpenCV images
@@ -45,6 +45,10 @@ class ImageClient(Node):
         self.shutter = False # when this is true, the client will issue a request to the server to capture images
         
         # create a folder to save the images
+        # save_folder/camera/rgb + save_folder/camera/depth
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.save_folder = os.path.join(self.save_folder, 'camera')
+        os.makedirs(self.save_folder, exist_ok=True)
         self.rgb_save_folder = os.path.join(self.save_folder, 'rgb')
         os.makedirs(self.rgb_save_folder, exist_ok=True)
         self.depth_save_folder = os.path.join(self.save_folder, 'depth')
@@ -248,10 +252,10 @@ class ImageClient(Node):
         transformation_matrix = self._process_tf(transformstamp)
 
 
-        update_dict['file_path'] = os.path.join('rgb', f'rgb_{self.rgb_count}.png')
+        update_dict['file_path'] = os.path.join('camera/rgb', f'rgb_{self.rgb_count}.png')
         update_dict['transformation_matrix'] = transformation_matrix.tolist()
         update_dict['colmap_im_id'] = self.rgb_count
-        update_dict['depth_file_path'] = os.path.join('depth', f'depth_{self.rgb_count}.png')
+        update_dict['depth_file_path'] = os.path.join('camera/depth', f'depth_{self.rgb_count}.png')
 
         self.json_dict['frames'].append(update_dict)
         
