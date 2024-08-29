@@ -1,4 +1,3 @@
-from pydoc import cli
 from realsense_interface_msg.srv import TakeImage
 
 from sensor_msgs.msg import Joy
@@ -310,8 +309,8 @@ def main(args=None):
             depth_response = depth_future.result()
 
             # postprocess the images
-            client.postprocess(rgb_response.frame, modality='rgb')
-            client.postprocess(depth_response.frame, modality='depth')
+            client.postprocess(rgb_response.frame, modality='rgb') # type: ignore
+            client.postprocess(depth_response.frame, modality='depth') # type: ignore
 
             
 
