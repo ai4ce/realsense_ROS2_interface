@@ -1,10 +1,10 @@
 # distance between the camera mount and the center of the gripper. All units in milimeter
 mount_translation_x: 0.0
-mount_translation_y: 69.66
-mount_translation_z: 41.1 
+mount_translation_y: 77.37 # 59.37 + 18 (half of the back of realsense)
+mount_translation_z: 10
 
-d405_height: 23.0
-d405_center2left: 9.0
+d405_height: 23.03
+d405_center2left: 10.0
 
 w: 1280
 h: 720
