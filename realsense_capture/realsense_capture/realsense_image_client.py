@@ -46,11 +46,9 @@ class ImageClient(Node):
         # create a folder to save the images
         # save_folder/camera/rgb + save_folder/camera/depth
         os.makedirs(self.save_folder, exist_ok=True)
-        self.save_folder = os.path.join(self.save_folder, 'camera')
-        os.makedirs(self.save_folder, exist_ok=True)
-        self.rgb_save_folder = os.path.join(self.save_folder, 'rgb')
+        self.rgb_save_folder = os.path.join(self.save_folder, 'images')
         os.makedirs(self.rgb_save_folder, exist_ok=True)
-        self.depth_save_folder = os.path.join(self.save_folder, 'depth')
+        self.depth_save_folder = os.path.join(self.save_folder, 'realsense_depth')
         os.makedirs(self.depth_save_folder, exist_ok=True)
 
         self.rgb_count = 0
@@ -157,36 +155,16 @@ class ImageClient(Node):
 
         if self.save_folder != '':
             if modality == 'rgb':
-                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.png'), 
+                cv2.imwrite(os.path.join(self.rgb_save_folder, f'{modality}_{self.rgb_count}.png'), 
                             cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-                np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.npy'), img)
+                # np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.rgb_count}.npy'), img)
             else:
-                cv2.imwrite(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.png'), 
+                cv2.imwrite(os.path.join(self.depth_save_folder, f'{modality}_{self.depth_count}.png'), 
                             img)
-                np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.npy'), img)
+                # np.save(os.path.join(self.save_folder, modality, f'{modality}_{self.depth_count}.npy'), img)
             self.get_logger().info(f'{save_color_start}{modality} image saved{save_color_reset}')
         else:
             self.get_logger().info(f'{save_color_start}{modality} image captured, not saved{save_color_reset}')
-
-    def depth_postprocess(self, img):
-        '''
-        I didn't use this. Not sure if normalizing is necessary anymore after I started to use cv_bridge. But keep it just in case
-        '''
-        base64_bytes = img.data.encode('ascii')
-        image_bytes = base64.b64decode(base64_bytes)
-        np_arr = np.frombuffer(image_bytes, dtype=np.uint16)
-
-        if img.encoding == '16UC1':
-            np_arr = np_arr.reshape((img.height, img.width))
-            img = np_arr.copy()
-            img[img > 1000] = 0
-            normalized_img = (img - img.min()) / (img.max() - img.min())
-            normalized_img = 255 * normalized_img
-            # (Optional) crop propotion that is lost to aligning detph to color
-            # np_arr = np_arr[:, 80:]
-        else:
-            raise NotImplementedError(f'Cannot deal with encoding {img["encoding"]} that is not "16UC1"')
-        cv2.imwrite('/home/irving/Desktop/depth.png', normalized_img)
 
     def _debounce_setup(self):
         '''
@@ -251,10 +229,10 @@ class ImageClient(Node):
         transformation_matrix = self._process_tf(transformstamp)
 
 
-        update_dict['file_path'] = os.path.join('camera/rgb', f'rgb_{self.rgb_count}.png')
-        update_dict['transformation_matrix'] = transformation_matrix.tolist()
+        update_dict['file_path'] = os.path.join('images', f'rgb_{self.rgb_count}.png')
+        update_dict['transform_matrix'] = transformation_matrix.tolist()
         update_dict['colmap_im_id'] = self.rgb_count
-        update_dict['depth_file_path'] = os.path.join('camera/depth', f'depth_{self.rgb_count}.png')
+        update_dict['depth_file_path'] = os.path.join('realsense_depth', f'depth_{self.rgb_count}.png')
 
         self.json_dict['frames'].append(update_dict)
         
