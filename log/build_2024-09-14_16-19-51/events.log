@@ -1,4 +1,0 @@
-[0.000000] (-) TimerEvent: {}
-[0.000251] (-) JobUnselected: {'identifier': 'realsense_capture'}
-[0.000316] (-) JobUnselected: {'identifier': 'realsense_interface_msg'}
-[0.000365] (-) EventReactorShutdown: {}
