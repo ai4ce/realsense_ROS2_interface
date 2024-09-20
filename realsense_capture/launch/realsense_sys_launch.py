@@ -28,13 +28,15 @@ from launch_ros.actions import Node
 
 configurable_parameters = [{'name': 'camera_namespace',             'default': 'xArm6', 'description': 'namespace for camera'},
                            {'name': 'camera_name',                  'default': 'D405', 'description': 'camera unique name'},
-                           {'name': 'save_folder',                  'default': '/home/zf540/Desktop/save_folder', 'description': 'folder to save images'},
-                           {'name': 'save_json_path',               'default': '/home/zf540/Desktop/save_folder/transforms.json', 'description': 'path to the logging json file. This is different from RealSense JSON parameter. If empty, no logging will be done'},
+                           {'name': 'save_folder',                  'default': '/home/doordash/Desktop/save_folder', 'description': 'folder to save images'},
+                           {'name': 'nerfstudio_output',            'default': 'true', 'description': 'If logging similar to NerfStudio is desired. If true, a transforms.json will appear in the save_folder'},
+                           {'name': 'EEF_link',                    'default': 'link_eef', 'description': 'End effector frame name'},
+                           {'name': 'base_link',                   'default': 'link_base', 'description': 'Base frame name'},
                            {'name': 'serial_no',                    'default': "''", 'description': 'choose device by serial number'},
                            {'name': 'usb_port_id',                  'default': "''", 'description': 'choose device by usb port id'},
                            {'name': 'device_type',                  'default': "''", 'description': 'choose device by type'},
                            {'name': 'config_file',                  'default': "''", 'description': 'yaml config file'},
-                           {'name': 'json_file_path',               'default': "/home/zf540/tactile_recon_ws/src/realsense_ROS2_interface/realsense_capture/config/json_config.json", 'description': 'allows advanced configuration'},
+                           {'name': 'json_file_path',               'default': "/home/doordash/Desktop/VLMTutor_ws/src/realsense_ROS2_interface/realsense_capture/config/json_config.json", 'description': 'allows advanced configuration'},
                            {'name': 'initial_reset',                'default': 'false', 'description': "''"},
                            {'name': 'accelerate_gpu_with_glsl',     'default': "false", 'description': 'enable GPU acceleration with GLSL'},
                            {'name': 'rosbag_filename',              'default': "''", 'description': 'A realsense bagfile to run from as a device'},
@@ -168,15 +170,17 @@ def generate_launch_description():
         name='image_client',
         parameters=[{'save_folder': launch_params['save_folder'],
                      'calibration_path': calibration_path,
-                     'save_json_path': launch_params['save_json_path'],
+                     'nerfstudio_output': True if launch_params['nerfstudio_output'] == 'true' else False,
                      }]
     )
-
+    
     static_tf_publisher_launch = Node(
         package='realsense_capture',
         executable='realsense_static_tf_publisher',
         name='realsense_static_tf_publisher',
-        parameters=[{'calibration_path': calibration_path}]
+        parameters=[{'calibration_path': calibration_path},
+                    {'EEF_link': launch_params['EEF_link']},
+                    {'base_link': launch_params['base_link']}]
     )
 
     # return LaunchDescription(declare_configurable_parameters(configurable_parameters) + 
@@ -184,4 +188,4 @@ def generate_launch_description():
     #                          [foxglove_launch, joy_launch, image_server_launch, image_client_launch, static_tf_publisher_launch])
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + 
                              [OpaqueFunction(function=launch_setup, kwargs = {'params' : launch_params})] + 
-                             [image_server_launch, image_client_launch, static_tf_publisher_launch])
+                             [joy_launch, image_server_launch, image_client_launch, static_tf_publisher_launch])

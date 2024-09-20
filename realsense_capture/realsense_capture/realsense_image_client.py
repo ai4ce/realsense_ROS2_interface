@@ -34,11 +34,16 @@ class ImageClient(Node):
         self.save_folder = self.get_parameter('save_folder').get_parameter_value().string_value
         self.declare_parameter(name = 'calibration_path', value = '')
         calibration_path = self.get_parameter('calibration_path').get_parameter_value().string_value
-        self.declare_parameter(name = 'save_json_path', value = '')
-        self.json_path = self.get_parameter('save_json_path').get_parameter_value().string_value
+        self.declare_parameter(name = 'nerfstudio_output', value = True)
+        self.nerfstudio_output = self.get_parameter('nerfstudio_output').get_parameter_value()._bool_value
 
         ############################ Miscanellous Setup #######################################
         self.cvbridge = CvBridge() # for converting ROS images to OpenCV images
+
+        if self.nerfstudio_output:
+            self.json_path = os.path.join(self.save_folder, 'transforms.json')
+        else:
+            self.json_path = '' # if empty, we don't save the json file
 
         self._debounce_setup() # for debouncing the capture button
         self.shutter = False # when this is true, the client will issue a request to the server to capture images

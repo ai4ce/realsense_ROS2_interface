@@ -24,6 +24,13 @@ class RealSenseStaticTFPublisher(Node):
         # it's complicated why we need to load the config path instead of the content of config. See launch file for explanation
         self.declare_parameter(name = 'calibration_path', value = '')
         config_path = self.get_parameter('calibration_path').get_parameter_value().string_value
+
+        self.declare_parameter(name='EEF_link', value='link_eef')
+        self.eef_link = self.get_parameter('EEF_link').get_parameter_value().string_value
+
+        self.declare_parameter(name='base_link', value='link_base')
+        self.base_link = self.get_parameter('base_link').get_parameter_value().string_value
+
         with open(config_path, "r") as f:
             config = yaml.safe_load(f)
             self.mount_translation_y = config['mount_translation_y']
@@ -55,7 +62,7 @@ class RealSenseStaticTFPublisher(Node):
     
     def publish_pose(self):
         try:
-            t = self.tf_buffer.lookup_transform('link_base', self.link_name, Time(), timeout=Duration(seconds=2))
+            t = self.tf_buffer.lookup_transform(self.base_link, self.link_name, Time(), timeout=Duration(seconds=2))
             self.pose_publisher.publish(t)
         except Exception as e:
             self.get_logger().info(f"Failed to publish pose: {e}")
@@ -64,7 +71,7 @@ class RealSenseStaticTFPublisher(Node):
         t = TransformStamped()
 
         t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = 'link_eef'
+        t.header.frame_id = self.eef_link
         t.child_frame_id = self.link_name
 
         t.transform.translation.x = float(-self.d405_center2left)*0.001
